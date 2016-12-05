@@ -1,0 +1,117 @@
+{
+    "root": "PATH_TO_DATA",
+    "pipelines": {
+        "flow": {
+            "dates": ["19850112"],
+            "files": [
+                {
+                    "filename": "flow_scores.csv",
+                    "reader": {
+                        "type": "csv.DictReader",
+                        "args": {
+                            "delimiter": ","
+                        }
+                    },
+                    "writer": {
+                        "type": "csv.DictWriter",
+                        "args": {
+                            "delimiter": ",",
+                            "fieldnames": [
+                                "header1", "header2", "header3"
+                            ]
+                        }
+                    },
+                    "transformations": [
+                        {
+                            "name": "column_rename",
+                            "config": {
+                                "test1": "header1",
+                                "test2": "header2"
+                            }
+                        },
+                        {
+                            "name": "column_delete",
+                            "config": ["test3"]
+                        },
+                        {
+                            "name": "column_add",
+                            "config": {
+                                "header3.1":"test"
+                            }
+                        },
+                        {
+                            "name": "column_set",
+                            "config": {
+                                "header3.1":"new_test"
+                            }
+                        },
+                        {
+                            "name": "column_rename",
+                            "config": {
+                                "header3.1": "header3"
+                            }
+                        },
+                        {
+                            "name": "debug"
+                        }
+                    ]
+                },
+                {
+                    "filename": "threats.csv",
+                    "reader": {
+                        "args": {
+                            "delimiter": "|"
+                        }
+                    },
+                    "writer": {
+                        "args": {
+                            "fieldnames": ["ip","title","summary"]
+                        }
+                    },
+                    "transformations": [
+                        {
+                            "name": "debug"
+                        }
+                    ]
+                }
+            ]
+        },
+        "dns": {
+            "dates": ["20160708"],
+            "files": [
+                {
+                    "filename": "dns_scores.csv",
+                    "writer": {
+                        "args": {
+                            "fieldnames": [
+                                "frame_time",
+                                "frame_len",
+                                "ip_dst",
+                                "dns_qry_name",
+                                "dns_qry_class",
+                                "dns_qry_type",
+                                "dns_qry_rcode",
+                                "score",
+                                "tld",
+                                "query_rep",
+                                "hh",
+                                "ip_sev",
+                                "dns_sev",
+                                "dns_qry_class_name",
+                                "dns_qry_type_name",
+                                "dns_qry_rcode_name",
+                                "network_context",
+                                "unix_tstamp"
+                            ]
+                        }
+                    },
+                    "transformations": [
+                        {
+                            "name": "debug"
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}
