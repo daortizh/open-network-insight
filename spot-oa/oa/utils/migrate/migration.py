@@ -1,3 +1,4 @@
+import glob
 import json
 import os
 from os import path
@@ -51,92 +52,119 @@ Root dir: {}
             print pipeline
             for date in pipeline_config.get('dates', []):
                 for file_config in pipeline_config.get('files', []):
-                    filename = file_config.get('filename', '')
-                    source_file = path.join(root_dir, pipeline, date, filename)
+                    globname = file_config.get('filename', '')
+                    source_glob = path.join(root_dir, pipeline, date, globname)
 
-                    # Does file exist?
-                    if not path.exists(source_file) or not path.isfile(source_file):
-                        print >> sys.stderr, '\t{}: not found, skipping'.format(filename)
-                        continue
+                    # Expand glob
+                    files_to_process = glob.glob(source_glob)
 
-                    print '\t{}:'.format(filename)
-
-                    # Instanciating transformations
-                    transformations = []
-                    for transformation_config in file_config.get('transformations', []):
-                        if not transformation_config.has_key('name'):
-                            print >> sys.stderr, '\t\tSkipping: Missing transformation name'
+                    for source_file in files_to_process:
+                        # Does file exist?
+                        if not path.exists(source_file) or not path.isfile(source_file):
+                            print >> sys.stderr, '\t{}: not found, skipping'.format(filename)
                             continue
 
-                        transformation_name = transformation_config.get('name')
-                        transformation_class = Migration.import_class('transformations.{}.Transformation'.format(transformation_name))
-                        if transformation_class is None:
-                            print >> sys.stderr, '\t\t{}, skipping'.format(transformation_name)
+                        print '\t{}:'.format(source_file)
+
+                        # Instanciating transformations
+                        transformations = []
+                        for transformation_config in file_config.get('transformations', []):
+                            if not transformation_config.has_key('name'):
+                                print >> sys.stderr, '\t\tSkipping: Missing transformation name'
+                                continue
+
+                            transformation_name = transformation_config.get('name')
+                            transformation_class = Migration.import_class('transformations.{}.Transformation'.format(transformation_name))
+                            if transformation_class is None:
+                                print >> sys.stderr, '\t\t{}, skipping'.format(transformation_name)
+                                continue
+
+                            if transformation_config.has_key('config'):
+                                transformation = transformation_class(transformation_config.get('config'))
+                            else:
+                                transformation = transformation_class()
+
+                            transformations.append((transformation_name, transformation))
+
+                            print '\t\t{}: {}'.format(transformation_name, transformation.get_banner().replace('\n', '\n\t\t\t'))
+
+                        reader_config = file_config.get('reader', {})
+                        reader_name = reader_config.get('type', 'csv.DictReader')
+                        reader_class = Migration.import_class(reader_name)
+
+                        if reader_class is None:
+                            print >> sys.stderr, '\t\t{}, skipping'.format(reader_name)
                             continue
 
-                        if transformation_config.has_key('config'):
-                            transformation = transformation_class(transformation_config.get('config'))
-                        else:
-                            transformation = transformation_class()
+                        writer_config = file_config.get('writer', {})
+                        writer_name = writer_config.get('type', 'csv.DictWriter')
+                        writer_class = Migration.import_class(writer_name)
 
-                        transformations.append((transformation_name, transformation))
+                        if writer_class is None:
+                            print >> sys.stderr, '\t\t{}, skipping'.format(writer_name)
+                            continue
 
-                        print '\t\t{}: {}'.format(transformation_name, transformation.get_banner().replace('\n', '\n\t\t\t'))
+                        Migration.transform_file(
+                            source_file,
+                            transformations,
+                            reader_class,
+                            reader_config,
+                            writer_class,
+                            writer_config,
+                            config.get('keep_backup', False)
+                        )
 
-                    reader_config = file_config.get('reader', {})
-                    reader_name = reader_config.get('type', 'csv.DictReader')
-                    reader_class = Migration.import_class(reader_name)
+    @staticmethod
+    def transform_file(source_file, transformations, reader_class, reader_config, writer_class, writer_config, keep_backup):
+        # Back up input file
+        source_file_items = path.splitext(source_file)
+        tmp_file = '{}{}'.format(source_file_items[0], '.migration')
 
-                    if reader_class is None:
-                        print >> sys.stderr, '\t\t{}, skipping'.format(reader_name)
-                        continue
+        try:
+            os.rename(source_file, tmp_file)
+        except:
+            print >> sys.stderr, '\t\t\tFailed to create backup'
+            return
 
-                    writer_config = file_config.get('writer', {})
-                    writer_name = writer_config.get('type', 'csv.DictWriter')
-                    writer_class = Migration.import_class(writer_name)
+        field_names = None
+        with open(tmp_file) as file_to_migrate:
+            args = Migration.normalize_args(reader_config.get('args', {}))
 
-                    if writer_class is None:
-                        print >> sys.stderr, '\t\t{}, skipping'.format(writer_name)
-                        continue
+            reader = reader_class(file_to_migrate, **args)
 
-                    # Back up input file
-                    source_file_items = path.splitext(source_file)
-                    tmp_file = '{}{}'.format(source_file_items[0], '.migration')
+            field_names = reader.next()
 
-                    try:
-                        os.rename(source_file, tmp_file)
-                    except:
-                        print >> sys.stderr, '\t\t\tFailed to create backup'
-                        continue
+        error = False
+        with open(tmp_file) as file_to_migrate:
+            args = Migration.normalize_args(reader_config.get('args', {}))
 
-                    error = False
-                    with open(tmp_file) as file_to_migrate:
-                        args = Migration.normalize_args(reader_config.get('args', {}))
+            reader = reader_class(file_to_migrate, **args)
 
-                        reader = reader_class(file_to_migrate, **args)
+            with open(source_file, 'w') as new_file:
+                args = Migration.normalize_args(writer_config.get('args', {}))
 
-                        with open(source_file, 'w') as new_file:
-                            args = Migration.normalize_args(writer_config.get('args', {}))
+                if not args.has_key('fieldnames'):
+                    args['fieldnames'] = field_names
 
-                            writer = writer_class(new_file, **args)
+                writer = writer_class(new_file, **args)
 
-                            try:
-                                Migration.apply_transformations(reader, writer, transformations)
-                            except TransformationRuntimeError, e:
-                                print >> sys.stderr, '\t\t\tTransformation ({}) error: {}'.format(e.transformation_name, e.message)
-                                error = True
+                try:
+                    Migration.apply_transformations(reader, writer, transformations)
+                except TransformationRuntimeError, e:
+                    print >> sys.stderr, '\t\t\tTransformation ({}) error: {}'.format(e.transformation_name, e.message)
+                    error = True
 
-                    if error:
-                        try:
-                            os.rename(tmp_file, source_file)
-                        except:
-                            print >> sys.stderr, '\t\t\tFailed to delete backup'
-                    else:
-                        if not config.get('keep_backup', False):
-                            try:
-                                os.remove(tmp_file)
-                            except:
-                                print >> sys.stderr, '\t\t\tFailed to delete backup'
+        if error:
+            try:
+                os.rename(tmp_file, source_file)
+            except:
+                print >> sys.stderr, '\t\t\tFailed to delete backup'
+        else:
+            if not keep_backup:
+                try:
+                    os.remove(tmp_file)
+                except:
+                    print >> sys.stderr, '\t\t\tFailed to delete backup'
 
     @staticmethod
     def apply_transformations(reader, writer, transformations):
