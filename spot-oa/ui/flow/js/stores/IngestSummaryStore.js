@@ -1,161 +1,102 @@
-var assign = require('object-assign');
-var d3 = require('d3');
+const d3 = require('d3');
 
-var SpotDispatcher = require('../../../js/dispatchers/SpotDispatcher');
-var SpotConstants = require('../../../js/constants/SpotConstants');
-var NetflowConstants = require('../constants/NetflowConstants');
-var DateUtils = require('../../../js/utils/DateUtils');
-var RestStore = require('../../../js/stores/RestStore');
+const SpotDispatcher = require('../../../js/dispatchers/SpotDispatcher');
+const SpotConstants = require('../../../js/constants/SpotConstants');
+const NetflowConstants = require('../constants/NetflowConstants');
+const DateUtils = require('../../../js/utils/DateUtils');
 
-var START_DATE_FILTER = NetflowConstants.START_DATE;
-var END_DATE_FILTER = NetflowConstants.END_DATE;
-var CURRENT_DATE_FILTER = 'current_date';
+const ObervableGraphQLStore = require('../../../js/stores/ObservableGraphQLStore');
 
-var requestQueue = [];
-var requestErrors = [];
-
-var IngestSummaryStore = assign(new RestStore(NetflowConstants.API_INGEST_SUMMARY), {
-    errorMessages: {
-        404: 'No details available'
-    },
-    setStartDate: function (date) {
-        this.setRestFilter(START_DATE_FILTER, date);
-    },
-    getStartDate: function () {
-        return this.getRestFilter(START_DATE_FILTER);
-    },
-    setEndDate: function (date) {
-        this.setRestFilter(END_DATE_FILTER, date);
-    },
-    getEndDate: function () {
-        return this.getRestFilter(END_DATE_FILTER);
-    },
-    /**
-     *  Start asking the server for CSV data to create the chart
-     **/
-    requestSummary: function () {
-        var startDate, endDate, date, delta, startRequests, i, month;
-
-        startDate = DateUtils.parseDate(this.getRestFilter(START_DATE_FILTER));
-        endDate = DateUtils.parseDate(this.getRestFilter(END_DATE_FILTER));
-
-        // Find out how many request need to be made
-        delta = (endDate.getFullYear() - startDate.getFullYear()) * 12 + (endDate.getMonth() - startDate.getMonth());
-
-        startRequests = requestQueue.length == 0;
-
-        // Go to first day in month
-        date = new Date(startDate);
-        date.setDate(1);
-
-        // Queue date requests
-        requestQueue.push(date);
-        for (i = 1; i <= delta; i++) {
-            requestQueue.push(DateUtils.calcDate(date, i, 'month'));
-        }
-
-        // dequeue is no request is running
-        startRequests && this.dequeue();
-    },
-    dequeue: function () {
-        var date, year, month;
-
-        if (requestQueue.length == 0) return;
-
-        date = requestQueue.shift();
-        this.setRestFilter(CURRENT_DATE_FILTER, date);
-        year = date.getFullYear();
-        month = date.getMonth() + 1 + "";
-        month = month.length == 1 ? "0" + month : month;
-
-        this.setEndpoint(NetflowConstants.API_INGEST_SUMMARY.replace('${year}', year).replace('${month}', month));
-
-        this.reload();
-    },
-    setData: function (data) {
-        var startDate, endDate, date, dayFilter, parse;
-
-        // Does the loading indicator needs to be displayed?
-        if (data.loading) {
-            if (!this._data.loading) {
-                this._data = data;
-                this.emitChangeData();
+class IngestSummaryStore extends ObervableGraphQLStore {
+    constructor() {
+        super();
+        this.setQuery(`
+            query($startDate:String!, $endDate:String!) {
+                netflow {
+                    ingestSummary(startDate: $startDate,endDate: $endDate) {
+                        date
+                        flows: total
+                    }
+                }
             }
-
-            // Do nothing when loading is in progress
-            return;
-        }
-
-        // Store errors for later usage
-        if (data.error) {
-            requestErrors.push(data);
-        }
-        else if (data.data) {
-            parse = d3.time.format("%Y-%m-%d %H:%M").parse; // Date formatting parser
-            startDate = DateUtils.parseDate(this.getRestFilter(START_DATE_FILTER));
-            endDate = DateUtils.parseDate(this.getRestFilter(END_DATE_FILTER));
-            date = DateUtils.parseDate(this.getRestFilter(CURRENT_DATE_FILTER));
-
-            if (date.getFullYear() == startDate.getFullYear() && date.getMonth() == startDate.getMonth()) {
-                dayFilter = startDate.getDate();
-                data.data = data.data.filter(function (row) {
-                    return DateUtils.parseDate(row.date, true).getDate() >= dayFilter
-                });
-            }
-
-            if (date.getFullYear() == endDate.getFullYear() && date.getMonth() == endDate.getMonth()) {
-                dayFilter = endDate.getDate();
-                data.data = data.data.filter(function (row) {
-                    return DateUtils.parseDate(row.date, true).getDate() <= dayFilter
-                });
-            }
-
-            // Parse dates and numbers.
-            data.data.forEach(function (d) {
-                d.date = parse(d.date);
-                d.flows = +d.flows;
-            });
-
-            // Sort the data by date ASC
-            data.data.sort(function (a, b) {
-                return a.date - b.date;
-            });
-
-            if (!this._data.data) this._data.data = [];
-            this._data.data.push(data.data);
-        }
-
-        this._data.loading = requestQueue.length > 0;
-
-        if (!this._data.loading) {
-            if (this._data.data.length==0) {
-                // Broadcast first found error
-                this._data = requestErrors[0];
-            }
-            this.emitChangeData();
-        }
-        else {
-            setTimeout(this.dequeue.bind(this), 1);
-        }
+        `);
     }
-});
+
+    setStartDate(date) {
+        console.log('Call to setStartDate');
+        this.setVariable('startDate', date);
+    }
+
+    getStartDate() {
+        console.log('Call to getStartDate');
+        return this.getVariable('startDate');
+    }
+
+    setEndDate(date) {
+        console.log('Call to setEndDate');
+        this.setVariable('endDate', date);
+    }
+
+    getEndDate() {
+        console.log('Call to getEndDate');
+        return this.getVariable('endDate');
+    }
+
+    requestSummary() {
+        console.log('Call to requestSummary');
+        this.sendQuery();
+    }
+
+    getData() {
+        const data = super.getData();
+
+        if (data.loading || data.error) return data;
+
+        const dataByMonth = {};
+        const parse = d3.time.format("%Y-%m-%d %H:%M").parse;
+
+        const startDate = DateUtils.parseDate(this.getStartDate());
+        const endDate = DateUtils.parseDate(this.getEndDate());
+
+        data.netflow.ingestSummary
+            .forEach(record => {
+                record.date = parse(record.date);
+
+                // Filter out dates outside range
+                if (record.date<startDate || endDate<record.date) return;
+
+                let month = `${record.date.getYear()}-${record.date.getMonth()}`;
+
+                if (!(month in dataByMonth)) dataByMonth[month] = [];
+
+                dataByMonth[month].push(record);
+            });
+
+        // Sort dates
+        const sortedData = Object.keys(dataByMonth).map(month => dataByMonth[month].sort((a, b) => a.date - b.date));
+
+         return {data: sortedData};
+    }
+}
+
+const iss = new IngestSummaryStore();
 
 SpotDispatcher.register(function (action) {
     switch (action.actionType) {
         case SpotConstants.UPDATE_DATE:
             switch (action.name) {
                 case NetflowConstants.START_DATE:
-                    IngestSummaryStore.setStartDate(action.date);
+                    iss.setStartDate(action.date);
                     break;
                 case NetflowConstants.END_DATE:
-                    IngestSummaryStore.setEndDate(action.date);
+                    iss.setEndDate(action.date);
                     break;
             }
             break;
         case NetflowConstants.RELOAD_INGEST_SUMMARY:
-            IngestSummaryStore.requestSummary();
+            iss.requestSummary();
             break;
     }
 });
 
-module.exports = IngestSummaryStore;
+module.exports = iss;
