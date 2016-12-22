@@ -13,10 +13,8 @@ class CsvDatedStore(DatedStore):
         records = []
 
         if not path.isfile(self.csvfile):
-            print 'Not a regular file: {}'.format(self.csvfile)
             return records
 
-        print 'Loading file: {}'.format(self.csvfile)
         with open(self.csvfile) as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
