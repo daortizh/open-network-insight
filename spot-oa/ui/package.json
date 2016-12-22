@@ -17,8 +17,6 @@
     "font-awesome": "^4.7.0",
     "jquery": "^2.0.0",
     "js-base64": "^2.1.9",
-    "lokka": "^1.7.0",
-    "lokka-transport-http": "^1.6.1",
     "object-assign": "^1.0.0",
     "react": "^15.3.2",
     "react-dom": "^15.3.2",

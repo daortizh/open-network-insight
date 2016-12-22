@@ -31,7 +31,8 @@ var SpotConstants = {
   RELOAD_COMMENTS: 'RELOAD_COMMENTS',
   SELECT_COMMENT: 'SELECT_COMMENT',
   // Server Paths
-  NOTEBOOKS_PATH: '/notebooks/ipynb'
+  NOTEBOOKS_PATH: '/notebooks/ipynb',
+  GRAPHQL_ENDPOINT: 'http://the-matrix:5000/graphql'
 };
 
 module.exports = SpotConstants;

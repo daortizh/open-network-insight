@@ -1,8 +1,5 @@
-const Lokka = require('lokka').Lokka;
-const Transport = require('lokka-transport-http').Transport;
-const graphQLClient = new Lokka({
-    transport: new Transport('http://the-matrix:5000/graphql')
-});
+const $ = require('jquery');
+const SpotConstants = require('../constants/SpotConstants');
 
 class GraphQLStore {
     constructor() {
@@ -37,17 +34,26 @@ class GraphQLStore {
 
     sendQuery() {
         const query = this.query;
-        const vars = this.variables;
+        const variables = this.variables;
 
         this.setData({loading: true});
-        graphQLClient.query(query, vars).then(
-            (resp) => {
-                this.setData(resp);
-            },
-            (err) => {
-                this.setData({error: err.message})
-            }
-        );
+        $.post({
+            accept: 'application/json',
+            contentType: 'application/json',
+            dataType: 'json',
+            data: JSON.stringify({
+                query,
+                variables
+            }),
+            url: SpotConstants.GRAPHQL_ENDPOINT
+        })
+        .done((response) => {
+            this.setData(response.data);
+        })
+        .fail((jqxhr, textStatus, error) => {
+            console.error('Unexpected GraphQL error', jqxhr.responseJSON)
+            this.setData({error: `${textStatus}: ${error}`})
+        });
     }
 }
 
