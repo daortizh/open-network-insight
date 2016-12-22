@@ -11,16 +11,28 @@ class ObervableGraphQLStore extends GraphQLStore {
     }
 
     addChangeDataListener(callback) {
-        this.eventEmitter.on(DATA_CHANGE_EVENT, callback);
+        this.addListener(DATA_CHANGE_EVENT, callback);
     }
 
     removeChangeDataListener(callback) {
-        this.eventEmitter.removeListener(callback);
+        this.removeListener(callback);
+    }
+
+    addListener(eventName, callback) {
+        this.eventEmitter.on(eventName, callback);
+    }
+
+    removeListener(eventName, callback) {
+        this.eventEmitter.removeListener(eventName, callback);
+    }
+
+    notifyListeners(eventName) {
+        this.eventEmitter.emit(eventName);
     }
 
     setData(data) {
         super.setData(data);
-        this.eventEmitter.emit(DATA_CHANGE_EVENT);
+        this.notifyListeners(DATA_CHANGE_EVENT);
     }
 }
 

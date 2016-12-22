@@ -26,7 +26,6 @@ def day_range(start_date, end_date):
 
         date = date + timedelta(days=1)
 
-    print dates
     return dates
 
 def month_range(start_date, end_date):
@@ -47,6 +46,35 @@ def month_range(start_date, end_date):
         dates.append(date)
 
     return dates
+
+def apply_filters(record, filters=[]):
+    state = None
+    for key, value, chain in filters:
+        partial_state = record.get(key, '') == value
+
+        if state is None:
+            state = partial_state
+        elif chain=='and':
+            state = state and partial_state
+        else:
+            state = state or partial_state
+
+    return state or False
+
+def load_suspicious(pipeline, ip, start_date, end_date):
+    dates = day_range(start_date, end_date)
+
+    if ip is not None:
+        filters = (('srcIP', ip, 'or'),('dstIP', ip, 'or'),('sev', '0', 'and'))
+    else:
+        filters = (('sev', '0', 'and'),)
+
+    records = load_data_from_dates(pipeline, '%Y%m%d', '{}_scores.csv'.format(pipeline), day_range(start_date, end_date))[0:250]
+
+    if filters is not None:
+        return filter(lambda record : apply_filters(record, filters), records)
+    else:
+        return records
 
 def load_ingest_summary(pipeline, start_date, end_date):
     dates = month_range(start_date, end_date)

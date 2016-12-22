@@ -3,12 +3,12 @@ const SpotConstants = require('../constants/SpotConstants');
 
 class GraphQLStore {
     constructor() {
-        this.query = null;
         this.variables = {};
+        this.data = {};
     }
 
-    setQuery(query) {
-        this.query = query;
+    getQuery() {
+        return null;
     }
 
     setVariable(name, value) {
@@ -24,7 +24,9 @@ class GraphQLStore {
     }
 
     getData() {
-        return this.data;
+        if (Object.keys(this.data).length==0 || this.data.loading || this.data.error) return this.data;
+
+        return {loading: false, data: this.unboxData(this.data)};
     }
 
     resetData() {
@@ -33,7 +35,7 @@ class GraphQLStore {
     }
 
     sendQuery() {
-        const query = this.query;
+        const query = this.getQuery();
         const variables = this.variables;
 
         this.setData({loading: true});
@@ -48,7 +50,13 @@ class GraphQLStore {
             url: SpotConstants.GRAPHQL_ENDPOINT
         })
         .done((response) => {
-            this.setData(response.data);
+            if (response.errors) {
+                console.error('Unexpected GraphQL error', response)
+                this.setData({error: 'Oops... something went wrong'});
+            }
+            else {
+                this.setData(response.data);
+            }
         })
         .fail((jqxhr, textStatus, error) => {
             console.error('Unexpected GraphQL error', jqxhr.responseJSON)

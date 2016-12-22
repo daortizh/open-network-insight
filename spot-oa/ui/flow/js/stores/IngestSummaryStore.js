@@ -8,9 +8,8 @@ const DateUtils = require('../../../js/utils/DateUtils');
 const ObervableGraphQLStore = require('../../../js/stores/ObservableGraphQLStore');
 
 class IngestSummaryStore extends ObervableGraphQLStore {
-    constructor() {
-        super();
-        this.setQuery(`
+    getQuery() {
+        return `
             query($startDate:String!, $endDate:String!) {
                 netflow {
                     ingestSummary(startDate: $startDate,endDate: $endDate) {
@@ -19,39 +18,30 @@ class IngestSummaryStore extends ObervableGraphQLStore {
                     }
                 }
             }
-        `);
+        `;
     }
 
     setStartDate(date) {
-        console.log('Call to setStartDate');
         this.setVariable('startDate', date);
     }
 
     getStartDate() {
-        console.log('Call to getStartDate');
         return this.getVariable('startDate');
     }
 
     setEndDate(date) {
-        console.log('Call to setEndDate');
         this.setVariable('endDate', date);
     }
 
     getEndDate() {
-        console.log('Call to getEndDate');
         return this.getVariable('endDate');
     }
 
     requestSummary() {
-        console.log('Call to requestSummary');
         this.sendQuery();
     }
 
-    getData() {
-        const data = super.getData();
-
-        if (data.loading || data.error) return data;
-
+    unboxData(data) {
         const dataByMonth = {};
         const parse = d3.time.format("%Y-%m-%d %H:%M").parse;
 
@@ -73,9 +63,7 @@ class IngestSummaryStore extends ObervableGraphQLStore {
             });
 
         // Sort dates
-        const sortedData = Object.keys(dataByMonth).map(month => dataByMonth[month].sort((a, b) => a.date - b.date));
-
-         return {data: sortedData};
+        return Object.keys(dataByMonth).map(month => dataByMonth[month].sort((a, b) => a.date - b.date));
     }
 }
 

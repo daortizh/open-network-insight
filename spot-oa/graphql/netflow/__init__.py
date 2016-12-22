@@ -8,8 +8,11 @@ from graphql import (
     GraphQLString
 )
 
-from data.common import day_range, load_data_from_dates, load_ingest_summary
+from data.common import day_range, load_data_from_dates, load_suspicious, load_ingest_summary
+from data.utils.csv_store import CsvDatedStore
+
 from suspicious import SuspiciousType
+from details import DetailsType
 from shared.ingest_summary import IngestSummaryType
 
 def get_date_range(args):
@@ -33,9 +36,30 @@ NetflowType = GraphQLObjectType(
             ),
             'endDate': GraphQLArgument(
                 type=GraphQLString
+            ),
+            'ip': GraphQLArgument(
+                type=GraphQLString
             )
         },
-        resolver=lambda root, args, *_ : load_data_from_dates('flow', '%Y%m%d', 'flow_scores.csv', day_range(*get_date_range(args)))
+        resolver=lambda root, args, *_ : load_suspicious('flow', args.get('ip', None), *get_date_range(args))
+    ),
+    'details': GraphQLField(
+        type=GraphQLList(DetailsType),
+        args={
+            'date': GraphQLArgument(
+                type=GraphQLNonNull(GraphQLString)
+            ),
+            'srcIp': GraphQLArgument(
+                type=GraphQLNonNull(GraphQLString)
+            ),
+            'dstIp': GraphQLArgument(
+                type=GraphQLNonNull(GraphQLString)
+            ),
+            'time': GraphQLArgument(
+                type=GraphQLNonNull(GraphQLString)
+            )
+        },
+        resolver=lambda root, args, *_ : CsvDatedStore('flow', datetime.strptime(args.get('date'), '%Y-%m-%d'), '%Y%m%d', 'edge-{}-{}-{}.tsv'.format(args.get('srcIp').replace('.', '_'), args.get('dstIp').replace('.', '_'), args.get('time').replace(':', '-')), delimiter='\t').load()
     ),
     'ingestSummary': GraphQLField(
         type=GraphQLList(IngestSummaryType),
