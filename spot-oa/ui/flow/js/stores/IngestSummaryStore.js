@@ -55,8 +55,8 @@ class IngestSummaryStore extends ObervableGraphQLStore {
         const dataByMonth = {};
         const parse = d3.time.format("%Y-%m-%d %H:%M").parse;
 
-        const startDate = DateUtils.parseDate(this.getStartDate());
-        const endDate = DateUtils.parseDate(this.getEndDate());
+        const startDate = DateUtils.parseDate(`${this.getStartDate()} 00:00`);
+        const endDate = DateUtils.parseDate(`${this.getEndDate()} 23:59`);
 
         data.netflow.ingestSummary
             .forEach(record => {
