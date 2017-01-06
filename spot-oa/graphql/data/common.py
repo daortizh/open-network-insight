@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from glima import get_raw_data, get_ingest_summary
 from utils.collection_store import CollectionStore
 from utils.csv_store import CsvDatedStore
 
@@ -77,11 +78,39 @@ def load_suspicious(pipeline, ip, start_date, end_date):
         return records
 
 def load_ingest_summary(pipeline, start_date, end_date):
-    dates = month_range(start_date, end_date)
+    start_date = datetime.strptime('{}'.format(start_date), '%Y-%m-%d')
+    end_date = datetime.strptime('{}'.format(end_date), '%Y-%m-%d')
 
-    records = load_data_from_dates(pipeline, 'ingest_summary', 'is_%Y%m.csv', dates)
+    print (
+        'is.{}'.format(pipeline),
+        start_date.year, start_date.month, start_date.day,
+        end_date.year, end_date.month, end_date.day
+    )
+    is_data = get_ingest_summary(
+        pipeline,
+        start_date.year, start_date.month, start_date.day,
+        end_date.year, end_date.month, end_date.day,
+        200
+    )
+    print 'Back from query'
 
-    start_date = datetime.strptime('{} 00:00:00'.format(start_date), '%Y-%m-%d %H:%M:%S')
-    end_date = datetime.strptime('{} 23:59:59'.format(end_date), '%Y-%m-%d %H:%M:%S')
+    return is_data
 
-    return filter(lambda record : start_date<=datetime.strptime(record.get('date'), '%Y-%m-%d %H:%S') and datetime.strptime(record.get('date'), '%Y-%m-%d %H:%S')<=end_date, records)
+def load_raw_data(pipeline, start_date, end_date):
+    start_date = datetime.strptime('{}'.format(start_date), '%Y-%m-%d')
+    end_date = datetime.strptime('{}'.format(end_date), '%Y-%m-%d')
+
+    print (
+        'rd.{}'.format(pipeline),
+        start_date.year, start_date.month, start_date.day,
+        end_date.year, end_date.month, end_date.day
+    )
+    raw_data = get_raw_data(
+        pipeline,
+        start_date.year, start_date.month, start_date.day,
+        end_date.year, end_date.month, end_date.day,
+        20000
+    )
+    print 'Back from query'
+
+    return raw_data

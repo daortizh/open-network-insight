@@ -8,9 +8,10 @@ from graphql import (
     GraphQLString
 )
 
-from data.common import day_range, load_data_from_dates, load_suspicious, load_ingest_summary
+from data.common import day_range, load_data_from_dates, load_suspicious, load_ingest_summary, load_raw_data
 from data.utils.csv_store import CsvDatedStore
 
+from raw import RawDataType
 from suspicious import SuspiciousType
 from details import DetailsType
 from shared.ingest_summary import IngestSummaryType
@@ -72,6 +73,18 @@ NetflowType = GraphQLObjectType(
             )
         },
         resolver=lambda root, args, *_ : load_ingest_summary('flow', *get_date_range(args))
+    ),
+    'raw': GraphQLField(
+        type=GraphQLList(RawDataType),
+        args={
+            'startDate': GraphQLArgument(
+                type=GraphQLString
+            ),
+            'endDate': GraphQLArgument(
+                type=GraphQLString
+            )
+        },
+        resolver=lambda root, args, *_ : load_raw_data('flow', *get_date_range(args))
     )
   }
 )
