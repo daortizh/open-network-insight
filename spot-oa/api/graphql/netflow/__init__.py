@@ -83,8 +83,7 @@ NetflowType = GraphQLObjectType(
             'endDate': GraphQLArgument(
                 type=GraphQLString
             )
-        },
-        resolver=lambda root, args, *_ : load_raw_data('flow', *get_date_range(args))
+        }
     )
   }
 )

@@ -32,7 +32,7 @@ var SpotConstants = {
   SELECT_COMMENT: 'SELECT_COMMENT',
   // Server Paths
   NOTEBOOKS_PATH: '/notebooks/ipynb',
-  GRAPHQL_ENDPOINT: 'http://10.219.32.104:5000/graphql'
+  GRAPHQL_ENDPOINT: 'http://10.64.98.85:5000/graphql'
 };
 
 module.exports = SpotConstants;
