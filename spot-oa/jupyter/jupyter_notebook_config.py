@@ -101,7 +101,7 @@
 #c.NotebookApp.cookie_secret_file = u''
 
 ## The default URL to redirect to from `/`
-#c.NotebookApp.default_url = '/tree'
+c.NotebookApp.default_url = '/files/ui/flow/suspicious.html'
 
 ## Disable cross-site-request-forgery protection
 #
@@ -133,7 +133,7 @@ c.NotebookApp.enable_mathjax = False
 #
 #  This allows adding javascript/css to be available from the notebook server
 #  machine, or overriding individual files in the IPython
-c.NotebookApp.extra_static_paths = ['ui/ipython/custom']
+# c.NotebookApp.extra_static_paths = []
 
 ## Extra paths to search for serving jinja templates.
 #
@@ -210,7 +210,7 @@ c.NotebookApp.open_browser = False
 #c.NotebookApp.password = u''
 
 ## The port the notebook server will listen on.
-#c.NotebookApp.port = 8888
+c.NotebookApp.port = 8889
 
 ## The number of additional ports to try if the specified port is not available.
 #c.NotebookApp.port_retries = 50
@@ -245,7 +245,7 @@ c.NotebookApp.token = ''
 ## Supply overrides for the tornado.web.Application that the Jupyter notebook
 #  uses.
 c.NotebookApp.tornado_settings = {
-    'static_url_prefix': '/custom/'
+    'static_url_prefix': '/static/'
 }
 
 ## Whether to trust or not X-Scheme/X-Forwarded-Proto and X-Real-Ip/X-Forwarded-
