@@ -27,26 +27,40 @@ QueryType = GraphQLObjectType(
   }
 )
 
-from netflow.mutation import ScoreInputType, ScoreOutputType
+from netflow.mutation import ScoreInputType, DxlTagInputType, DxlOutputType
 
 def score_netflow(root, args, *_):
     publish_score_event('netflow', args.get('input'))
 
     return True
 
-from api.integrators import publish_score_event
+from api.integrators import publish_score_event, publish_tag_device
+
+def tag_device(root, args, *_):
+    publish_tag_device(args.get('input'))
+
+    return True
 
 MutationType = GraphQLObjectType(
     name = 'RootMutationType',
     fields = {
         'scoreNetflow': GraphQLField(
-            type=ScoreOutputType,
+            type=DxlOutputType,
             args={
                 'input': GraphQLArgument(
                     type=ScoreInputType
                 )
             },
             resolver=score_netflow
+        ),
+        'tagDevice': GraphQLField(
+            type=DxlOutputType,
+            args={
+                'input': GraphQLArgument(
+                    type=DxlTagInputType
+                )
+            },
+            resolver=tag_device
         )
     }
 )

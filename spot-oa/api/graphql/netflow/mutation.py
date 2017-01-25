@@ -14,6 +14,15 @@ from graphql import (
 
 from graphql.type import GraphQLEnumValue
 
+DxlOutputType = GraphQLObjectType(
+    name='NetflowDxlOutputType',
+    fields={
+        'success': GraphQLField(
+            type=GraphQLBoolean
+        )
+    }
+)
+
 ScoreType = GraphQLEnumType(
     name='ScoreType',
     values=OrderedDict((
@@ -44,11 +53,26 @@ ScoreInputType = GraphQLInputObjectType(
     }
 )
 
-ScoreOutputType = GraphQLObjectType(
-    name='NetflowScoreOutputType',
+DxlTagType = GraphQLEnumType(
+    name='DxlTagType',
+    values=OrderedDict((
+        ('BLOCK', GraphQLEnumValue('BLOCK')),
+        ('QUARANTINE', GraphQLEnumValue(value='QUARANTINE')),
+        ('MARINSTALL', GraphQLEnumValue(value='MARINSTALL'))
+    ))
+)
+
+DxlTagInputType = GraphQLInputObjectType(
+    name='DxlTagInputType',
     fields={
-        'success': GraphQLField(
-            type=GraphQLBoolean
+        'srcIp': GraphQLInputObjectField(
+            type=GraphQLString
+        ),
+        'dstIp': GraphQLInputObjectField(
+            type=GraphQLString
+        ),
+        'tag': GraphQLInputObjectField(
+            type=DxlTagType
         )
     }
 )

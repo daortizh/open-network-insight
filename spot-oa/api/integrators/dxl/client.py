@@ -60,3 +60,26 @@ class SpotDxlClient:
             # Publish the Event to the DXL Fabric on the Topic
             logger.info('DXL Publisher - Publishing Event to {}'.format(EVENT_TOPIC))
             client.send_event(event)
+
+    def publish_tag_device(self, data):
+        EVENT_TOPIC = '/apache/spot/dxl/tag'
+
+        # Initialize DXL client using our configuration
+        logger.info("Event Publisher - Creating DXL Client")
+        with self._create_client() as client:
+            logger.info('DXL Publisher - Connecting to Broker')
+            try:
+                client.connect()
+            except:
+                logger.error('DXL was not able to stablish a connection')
+                return
+
+            logger.info('DXL Publisher - Connected to Broker')
+            event = Event(EVENT_TOPIC)
+
+            # Encode string payload as json
+            event.payload = json.dumps(data).encode()
+
+            # Publish the Event to the DXL Fabric on the Topic
+            logger.info('DXL Publisher - Publishing Event to {}'.format(EVENT_TOPIC))
+            client.send_event(event)

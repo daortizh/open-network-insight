@@ -35,3 +35,15 @@ def publish_score_event(type, data):
         publisher = publisher_cls(publishers.get(publisher_name))
 
         publisher.send_score_event(type, data)
+
+def publish_tag_device(data):
+    publishers = CONFIG.get('integration', {}).get('publishers', {})
+    for publisher_name in publishers.keys():
+        publisher_cls = get_publisher(publisher_name)
+
+        if publisher_cls is None:
+            continue
+
+        publisher = publisher_cls(publishers.get(publisher_name))
+
+        publisher.publish_tag_device(data)
