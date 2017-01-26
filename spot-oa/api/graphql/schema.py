@@ -2,12 +2,18 @@ from graphql import (
     GraphQLArgument,
     GraphQLSchema,
     GraphQLObjectType,
-    GraphQLField
+    GraphQLField,
+    GraphQLString,
+    GraphQLList
 )
 
 from netflow import NetflowType
 from dns import DnsType
 from proxy import ProxyType
+
+from mar import MarType
+
+from api.integrators import publish_score_event, publish_tag_device, request_device_info
 
 QueryType = GraphQLObjectType(
     name = 'RootQueryType',
@@ -23,8 +29,17 @@ QueryType = GraphQLObjectType(
         'proxy': GraphQLField(
             type=ProxyType,
             resolver=lambda *_: {}
+        ),
+        'mar': GraphQLField(
+            type=GraphQLList(MarType),
+            args={
+                'ip': GraphQLArgument(
+                    type=GraphQLString
+                )
+            },
+            resolver=lambda root, args, *_ : request_device_info(args.get('ip'))
         )
-  }
+    }
 )
 
 from netflow.mutation import ScoreInputType, DxlTagInputType, DxlOutputType
@@ -33,8 +48,6 @@ def score_netflow(root, args, *_):
     publish_score_event('netflow', args.get('input'))
 
     return True
-
-from api.integrators import publish_score_event, publish_tag_device
 
 def tag_device(root, args, *_):
     publish_tag_device(args.get('input'))
