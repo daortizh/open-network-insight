@@ -40,6 +40,10 @@
     padding: 0 !important;
 }
 
+.spot.spot_easy_mode .cell.selected {
+    background: none;
+}
+
 /*****************************************
  **         EASY MODE SPINNER           **
  *****************************************/
@@ -105,6 +109,15 @@
 
 .spot .spot-text-wrapper.spot-text-xlg {
     width: 30em;
+}
+
+/* Fix for select widgets */
+.spot .widget-select.spot-reset-css select.widget-listbox,
+.spot .widget-text.spot-reset-css,
+.spot .widget-button.spot-reset-css
+ {
+    width: auto;
+    flex: 1 0 auto;
 }
 
 /* Classes for the threat investigation notebooks*/
