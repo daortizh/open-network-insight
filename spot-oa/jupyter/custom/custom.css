@@ -112,12 +112,13 @@
 }
 
 /* Fix for select widgets */
-.spot .widget-select.spot-reset-css select.widget-listbox,
+.spot .widget-select.spot-reset-css select.widget-listbox {
+    width: 100%;
+}
 .spot .widget-text.spot-reset-css,
 .spot .widget-button.spot-reset-css
  {
     width: auto;
-    flex: 1 0 auto;
 }
 
 /* Classes for the threat investigation notebooks*/
