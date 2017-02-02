@@ -96,19 +96,19 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    width: 12em;
+    max-width: 12em;
 }
 
 .spot .spot-text-wrapper.spot-text-sm {
-    width: 6em;
+    max-width: 6em;
 }
 
 .spot .spot-text-wrapper.spot-text-lg {
-    width: 18em;
+    max-width: 18em;
 }
 
 .spot .spot-text-wrapper.spot-text-xlg {
-    width: 30em;
+    max-width: 30em;
 }
 
 /* Fix for select widgets */
