@@ -116,44 +116,35 @@
     width: 100%;
 }
 .spot .widget-text.spot-reset-css,
+.spot .widget-textarea.spot-reset-css,
 .spot .widget-button.spot-reset-css
  {
     width: auto;
 }
 
+.spot .widget-subarea {
+    min-width: 0;
+}
+
 /* Classes for the threat investigation notebooks*/
 body.spot_easy_mode[data-notebook-name*="Threat"] .widget-area .widget-box div table,
-body.spot_ninja_mode[data-notebook-name*="Threat"] .widget-area .widget-box div table{
+body.spot_ninja_mode[data-notebook-name*="Threat"] .widget-area .widget-box div table {
     margin:10px 10px 20px 0px;
     font-size:12px;
 }
 
 
 body.spot_easy_mode[data-notebook-name*="Threat"] .widget-area .widget-box div table td, th,
-body.spot_ninja_mode[data-notebook-name*="Threat"] .widget-area .widget-box div table td, th{
+body.spot_ninja_mode[data-notebook-name*="Threat"] .widget-area .widget-box div table td, th {
     border: solid 1px #CCC;
     padding: 3px;
     background-color: #FFF;
     line-height:14px;
-}
-
-body.spot_easy_mode[data-notebook-name*="Threat"] .widget-area .widget-box div table td,
-body.spot_ninja_mode[data-notebook-name*="Threat"] .widget-area .widget-box div table td{
-    height:25px;
-    max-width: 180px;
-    width:100px;
-}
-
-body.spot_easy_mode[data-notebook-name*="Threat"] .widget-area .widget-box div table th,
-body.spot_ninja_mode[data-notebook-name*="Threat"] .widget-area .widget-box div table th{
-
-    background-color: #0071C5;
-    color: #FFF;
     text-align: center;
 }
 
-body.spot_easy_mode[data-notebook-name*="Threat"] .widget-area > .widget-subarea,
-body.spot_ninja_mode[data-notebook-name*="Threat"] .widget-area > .widget-subarea
-{
-    width: 90%;
+body.spot_easy_mode[data-notebook-name*="Threat"] .widget-area .widget-box div table th,
+body.spot_ninja_mode[data-notebook-name*="Threat"] .widget-area .widget-box div table th {
+    background-color: #0071C5;
+    color: #FFF;
 }
