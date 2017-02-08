@@ -1,3 +1,9 @@
+import os, sys
+
+sys.path.append(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
+
 # Create a flask application
 from flask import Flask
 from flask_cors import CORS
