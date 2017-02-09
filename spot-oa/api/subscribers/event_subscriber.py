@@ -87,11 +87,25 @@ try:
                     self.on_osc_event(event_dict)
 
             def on_epo_event(self, event_dict):
+		names = []
+		for ip in [str(event_dict[key]) for key in ['srcIp', 'dstIp'] if event_dict.has_key(key) and event_dict.get(key)!='']:
+		    object_name = OSC_MAP['devices'].get(ip, {}).get('name')
+
+
+                    if object_name is None:
+                        logger.warn('Object name not found for {}'.format(ip))
+                        continue
+
+                    names.append(object_name)
+
+                if len(names)==0:
+                    return
+
                 try:
                     # Build command
                     command = 'system.applyTag'
                     req_dict = {
-                        'names': ','.join([str(event_dict[key]) for key in ['srcIp', 'dstIp'] if event_dict.has_key(key)]),
+                        'names': ','.join(names),
                         'tagName': event_dict.get('tag', 'BLOCK')
                     }
 
@@ -120,7 +134,7 @@ try:
                         object_id = OSC_MAP['devices'].get(ip, {}).get('objectId')
 
                         if object_id is None:
-                            logger.warn('Invalid object id: {}'.format(object_id))
+                            logger.warn('Object id not found for {}'.format(ip))
                             continue
 
                         http = urllib3.PoolManager()
