@@ -78,16 +78,16 @@ try:
                 logger.info("Event Subscriber - Event received:\n   Topic: %s\n   Payload: %s",
                             event.destination_topic, event.payload.decode())
 
-                if event.destination_topic==SCORE_EVENT_TOPIC:
-                    self.on_epo_event(event)
-                else:
-                    self.on_osc_event(event)
+                # Build dictionary from the event payload
+                event_dict = json.loads(event.payload.decode())
 
-            def on_epo_event(self, event):
+                if event_dict.get('target', '').lower()=='epo':
+                    self.on_epo_event(event_dict)
+                elif event_dict.get('target', '').lower()=='osc':
+                    self.on_osc_event(event_dict)
+
+            def on_epo_event(self, event_dict):
                 try:
-                    # Build dictionary from the event payload
-                    event_dict = json.loads(event.payload.decode())
-
                     # Build command
                     command = 'system.applyTag'
                     req_dict = {
@@ -103,11 +103,8 @@ try:
                     # Send error response
                     logger.error(str(ex))
 
-            def on_osc_event(self, event):
+            def on_osc_event(self, event_dict):
                 try:
-                    # Build dictionary from the event payload
-                    event_dict = json.loads(event.payload.decode())
-
                     osc_scope = 'globalroot-0'
                     OSC_URL_TPL = '{}/api/2.0/services/securitygroup/{}/members/{}?failIfExists=false'
 
@@ -151,8 +148,6 @@ try:
 
         # Add Event callback to DXL client
         callback = TagEventCallback()
-        logger.info("Adding Event callback function to Topic: %s", SCORE_EVENT_TOPIC)
-        client.add_event_callback(SCORE_EVENT_TOPIC, callback)
         logger.info("Adding Event callback function to Topic: %s", TAG_EVENT_TOPIC)
         client.add_event_callback(TAG_EVENT_TOPIC, callback)
 

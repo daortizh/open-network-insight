@@ -71,6 +71,9 @@ DxlTagInputType = GraphQLInputObjectType(
         'dstIp': GraphQLInputObjectField(
             type=GraphQLString
         ),
+        'target': GraphQLInputObjectField(
+            type=GraphQLString
+        ),
         'tag': GraphQLInputObjectField(
             type=DxlTagType
         )
