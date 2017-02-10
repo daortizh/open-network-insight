@@ -10,31 +10,31 @@ MarCurrentFlowType = GraphQLObjectType(
     fields = {
         'local_ip': GraphQLField(
             type=GraphQLString,
-            resolver=lambda root, args, *_ : root.get('local_ip')
+            resolver=lambda root, args, *_ : root.get('CurrentFlow|local_ip')
         ),
         'local_port': GraphQLField(
             type=GraphQLInt,
-            resolver=lambda root, args, *_ : root.get('local_port')
+            resolver=lambda root, args, *_ : root.get('CurrentFlow|local_port')
         ),
         'remote_ip': GraphQLField(
             type=GraphQLString,
-            resolver=lambda root, args, *_ : root.get('remote_ip')
+            resolver=lambda root, args, *_ : root.get('CurrentFlow|remote_ip')
         ),
         'remote_port': GraphQLField(
             type=GraphQLInt,
-            resolver=lambda root, args, *_ : root.get('remote_port')
+            resolver=lambda root, args, *_ : root.get('CurrentFlow|remote_port')
         ),
         'status': GraphQLField(
             type=GraphQLString,
-            resolver=lambda root, args, *_ : root.get('status')
+            resolver=lambda root, args, *_ : root.get('CurrentFlow|status')
         ),
         'user_id': GraphQLField(
             type=GraphQLString,
-            resolver=lambda root, args, *_ : root.get('user_id')
+            resolver=lambda root, args, *_ : root.get('CurrentFlow|user_id')
         ),
         'user': GraphQLField(
             type=GraphQLString,
-            resolver=lambda root, args, *_ : root.get('user')
+            resolver=lambda root, args, *_ : root.get('CurrentFlow|user')
         )
     }
 )
@@ -44,7 +44,7 @@ MarType = GraphQLObjectType(
     fields = {
         'CurrentFlow': GraphQLField(
             type=MarCurrentFlowType,
-            resolver=lambda root, args, *_ : root.get('CurrentFlow')
+            resolver=lambda root, args, *_ : root
         )
     }
 )

@@ -51,7 +51,7 @@ def publish_tag_device(data):
 def request_device_info(ip):
     publishers = CONFIG.get('integration', {}).get('publishers', {})
 
-    """for publisher_name in publishers.keys():
+    for publisher_name in publishers.keys():
         publisher_cls = get_publisher(publisher_name)
 
         if publisher_cls is None:
@@ -61,30 +61,4 @@ def request_device_info(ip):
 
         result = publisher.request_device_info(ip)
 
-        if result is not None:
-            return result"""
-
-    return (
-        {
-            'CurrentFlow': {
-                'local_port': 443,
-                'local_ip': '0.0.0.0',
-                'remote_ip': '0.0.0.0',
-                'remote_port': 0,
-                'status': 'LISTENING',
-                'user_id': 'S-1-5-18',
-                'user': 'NT AUTHORITY\SYSTEM'
-            }
-        },
-        {
-            'CurrentFlow': {
-                'local_port': 3180,
-                'local_ip': '10.219.100.155',
-                'remote_ip': '10.219.100.155',
-                'remote_port': 49851,
-                'status': 'ESTABLISHED',
-                'user_id': 'S-1-5-80-3880718306-3832830129-1677859214-2598158968-1052248003',
-                'user': 'NT SERVICE\MSSQLSERVER'
-            }
-        },
-    )
+        return result or {}

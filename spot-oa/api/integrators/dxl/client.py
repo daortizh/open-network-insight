@@ -1,7 +1,8 @@
 from dxlclient.broker import Broker
 from dxlclient.client import DxlClient
 from dxlclient.client_config import DxlClientConfig
-from dxlclient.message import Event
+from dxlclient.message import Event, Request, Message
+from dxlmarclient import MarClient
 
 import json
 
@@ -83,3 +84,40 @@ class SpotDxlClient:
             # Publish the Event to the DXL Fabric on the Topic
             logger.info('DXL Publisher - Publishing Event to {}'.format(EVENT_TOPIC))
             client.send_event(event)
+
+    def request_device_info(self, ip):
+        # Initialize DXL client using our configuration
+        logger.info("Request info from MAR - Creating DXL Client")
+        with self._create_client() as client:
+            try:
+                client.connect()
+            except:
+                logger.error('DXL was not able to stablish a connection')
+                return None
+
+            # Create the search
+            logger.info("Request info from MAR - Sending search criteria")
+
+            # Create the McAfee Active Response (MAR) client
+            mar_client = MarClient(client)
+            mar_client.response_timeout = 60
+
+            # Performs the search
+            result_context = \
+                mar_client.search(
+                    projections=[{
+                        'name': 'CurrentFlow',
+                        'outputs': ['local_port', 'local_ip', 'remote_ip', 'remote_port', 'status', 'user_id', 'user']
+                    }]
+                )
+
+            # Loop and display the results
+            if result_context.has_results:
+                search_result = result_context.get_results(limit=10)
+                print "Results:"
+                for item in search_result["items"]:
+                    print "    " + str(item["output"])
+                return [item['output'] for item in search_result['items']]
+
+            else:
+                return None
