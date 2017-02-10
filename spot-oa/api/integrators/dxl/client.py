@@ -4,6 +4,8 @@ from dxlclient.client_config import DxlClientConfig
 from dxlclient.message import Event, Request, Message
 from dxlmarclient import MarClient
 
+from dxlmarclient.constants import ConditionConstants, OperatorConstants
+
 import json
 
 from api.common import logger
@@ -108,7 +110,17 @@ class SpotDxlClient:
                     projections=[{
                         'name': 'CurrentFlow',
                         'outputs': ['local_port', 'local_ip', 'remote_ip', 'remote_port', 'status', 'user_id', 'user']
-                    }]
+                    }],
+                    conditions={
+                        ConditionConstants.OR: [{
+                            ConditionConstants.AND: [{
+                                ConditionConstants.COND_NAME: "HostInfo",
+                                ConditionConstants.COND_OUTPUT: "ip_address",
+                                ConditionConstants.COND_OP: OperatorConstants.EQUALS,
+                                ConditionConstants.COND_VALUE: ip
+                            }]
+                        }]
+                    }
                 )
 
             # Loop and display the results
