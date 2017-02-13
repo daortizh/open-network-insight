@@ -108,8 +108,9 @@ class SpotDxlClient:
             result_context = \
                 mar_client.search(
                     projections=[{
-                        'name': 'CurrentFlow',
-                        'outputs': ['local_port', 'local_ip', 'remote_ip', 'remote_port', 'status', 'user_id', 'user']
+                        'name': 'CurrentFlow'
+                    },{
+                        'name': 'NetworkFlow'
                     }],
                     conditions={
                         ConditionConstants.OR: [{
