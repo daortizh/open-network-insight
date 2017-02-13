@@ -126,7 +126,7 @@ class SpotDxlClient:
 
             # Loop and display the results
             if result_context.has_results:
-                search_result = result_context.get_results(limit=10)
+                search_result = result_context.get_results(limit=100)
                 print "Results:"
                 for item in search_result["items"]:
                     print "    " + str(item["output"])
