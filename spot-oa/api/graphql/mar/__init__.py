@@ -28,6 +28,14 @@ MarCurrentFlowType = GraphQLObjectType(
             type=GraphQLString,
             resolver=lambda root, args, *_ : root.get('CurrentFlow|status')
         ),
+        'proto': GraphQLField(
+            type=GraphQLString,
+            resolver=lambda root, args, *_ : root.get('CurrentFlow|proto')
+        ),
+        'process': GraphQLField(
+            type=GraphQLString,
+            resolver=lambda root, args, *_ : root.get('CurrentFlow|process')
+        ),
         'user_id': GraphQLField(
             type=GraphQLString,
             resolver=lambda root, args, *_ : root.get('CurrentFlow|user_id')
