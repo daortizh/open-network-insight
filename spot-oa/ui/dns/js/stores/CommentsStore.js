@@ -13,7 +13,7 @@ class CommentsStore extends ObservableGraphQLStore {
                     threats{
                         comments(date:$date) {
                             title
-                            text
+                            summary: text
                             ...QueryComment
                             ...ClientIpComment
                         }
