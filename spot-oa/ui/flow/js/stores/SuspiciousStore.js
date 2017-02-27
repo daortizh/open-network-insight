@@ -61,7 +61,6 @@ class SuspiciousStore extends ObservableWithHeadersGraphQLStore {
                         ibyt: inBytes
                         opkt: outPkts
                         obyt: outBytes
-                        sev
                         score
                     }
                 }
